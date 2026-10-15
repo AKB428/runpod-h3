@@ -1,10 +1,10 @@
 # runpod-h3
 
 RunPod の公式 ComfyUI イメージに、MiniMax H3(音声つき動画生成モデル)のモデル 7 本を自動で入れる起動スクリプトです。
-RunPod のテンプレート「**MiniMax H3 + ComfyUI 0.35 (CUDA 13) — Vidubus ready**」が、このリポジトリの `setup-h3.sh` を起動時に流します。
+RunPod のテンプレート「**MiniMax H3 ComfyUI 0.35 CUDA13 - Vidubus**」が、このリポジトリの `setup-h3.sh` を起動時に流します。
 
 - 解説記事: (準備中 · note の記事 URL をここに入れます)
-- テンプレート: (準備中 · RunPod のテンプレートのリンクをここに入れます)
+- テンプレート: https://console.runpod.io/deploy?template=uv8e4qky3x
 - Vidubus(日本語で頼むと H3 の動画ができるローカルアプリ): https://vidubus.pages.dev/
 
 ## 何をするか
