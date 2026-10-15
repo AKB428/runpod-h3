@@ -48,12 +48,13 @@ URL はこのリポジトリのコミットで固定しています(`main` は�
 ## 注意
 
 - ComfyUI のポート 8188 には認証がありません。URL を人に見せないでください。使い終わったら pod を Stop か Terminate してください
+- Deploy の画面で **Add volume → Volume disk → 100 GB** を付けてください。付けないと `/workspace` は Container disk の中になり、Stop するとモデルが消えます(Terminate 前提なら無くても動きます)
 - GPU は CUDA 13 に対応したもの(RTX 5090 · RTX PRO 4500 など)を、Deploy の画面の **Additional filters → CUDA Versions = 13.0** で選んでください
 - MiniMax H3 のモデルの利用規約は、各自で確認してください(自己責任でお使いください)
 
 ## English
 
-`setup-h3.sh` is a start-up helper for a RunPod pod template. The template uses RunPod's official ComfyUI image (`runpod/comfyui:1.4.0-comfyuiv0.35.0-cuda13.0`) as is, and its start command runs this script in the background before handing over to the image's own `/start.sh`. The script waits until ComfyUI has been copied into `/workspace`, then downloads the seven MiniMax H3 files (64.96 GB, pinned revision of `Comfy-Org/MiniMax-H3`) with aria2c into `ComfyUI/models/`. Files that already exist with the correct size are skipped. It does not modify ComfyUI, torch or custom nodes. Progress is shown in the pod's Logs and in `/workspace/h3-setup.log`. Port 8188 has no authentication, so stop or terminate the pod when you are done. Check the MiniMax H3 model license yourself.
+`setup-h3.sh` is a start-up helper for a RunPod pod template. The template uses RunPod's official ComfyUI image (`runpod/comfyui:1.4.0-comfyuiv0.35.0-cuda13.0`) as is, and its start command runs this script in the background before handing over to the image's own `/start.sh`. The script waits until ComfyUI has been copied into `/workspace`, then downloads the seven MiniMax H3 files (64.96 GB, pinned revision of `Comfy-Org/MiniMax-H3`) with aria2c into `ComfyUI/models/`. Files that already exist with the correct size are skipped. It does not modify ComfyUI, torch or custom nodes. Progress is shown in the pod's Logs and in `/workspace/h3-setup.log`. On the new Deploy page, add a Volume disk (Add volume → Volume disk → 100 GB); otherwise `/workspace` lives on the container disk and the models are erased when the pod is stopped. Port 8188 has no authentication, so stop or terminate the pod when you are done. Check the MiniMax H3 model license yourself.
 
 ## License
 
