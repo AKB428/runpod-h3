@@ -39,11 +39,11 @@ RunPod のテンプレート「**MiniMax H3 + ComfyUI 0.35 (CUDA 13) — Vidubus
 ```json
 {
   "entrypoint": ["bash", "-c"],
-  "cmd": ["curl -fsSL --retry 5 -o /tmp/setup-h3.sh https://raw.githubusercontent.com/AKB428/runpod-h3/<commit>/setup-h3.sh && (bash /tmp/setup-h3.sh &); exec /start.sh"]
+  "cmd": ["curl -fsSL --retry 5 -o /tmp/setup-h3.sh https://raw.githubusercontent.com/AKB428/runpod-h3/ca84611c456edba735bef4253cba7fdd6711fd8e/setup-h3.sh && (bash /tmp/setup-h3.sh &); exec /start.sh"]
 }
 ```
 
-`<commit>` はこのリポジトリのコミットで固定しています(`main` は指しません)。
+URL はこのリポジトリのコミットで固定しています(`main` は指しません)。スクリプトを直したら、テンプレートの URL を新しいコミットに書き換えます。
 
 ## 注意
 
