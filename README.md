@@ -61,7 +61,7 @@ ComfyUI(8188)と Ollama(11434)を 1 つの pod に入れます。Vidubus の接�
 - モデルは `gemma4:12b-it-qat` だけです(切り替えの仕組みはありません)。ほかのモデルが欲しいときは、Web terminal から `OLLAMA_HOST=127.0.0.1:11434 /workspace/ollama/0.32.13/bin/ollama pull <名前>` で足せます
 - Vidubus の「VRAM を空ける」(Ollama タブ / ComfyUI タブ)は **2 つとも ON のまま**にしてください。OFF にすると H3 が VRAM を占めたままになり、英語プロンプトが 4.7 tok/s まで落ちました(RTX PRO 4500 · 2026-10-16)
 - 2 回目の起動(Volume disk)では、Ollama と gemma が揃っていれば落とし直しません
-- 進み具合 = Logs と `/workspace/ollama-setup.log`(Ollama 自体のログ = `/workspace/ollama-serve.log`)
+- 進み具合 = Logs と `/workspace/ollama-setup.log`(Ollama 自体のログ = `/workspace/ollama-serve.log`)。gemma の取得中は `[ollama-setup] 04:27:30 gemma4:12b-it-qat 45% (3.2/7.2 GB)` の行が 10 秒か 10% ごとに出て、終わると `Ollama ready (gemma4:12b-it-qat · 6.7G)` が出ます
 
 | 項目 | 値 |
 | --- | --- |
@@ -75,7 +75,7 @@ ComfyUI(8188)と Ollama(11434)を 1 つの pod に入れます。Vidubus の接�
 ```json
 {
   "entrypoint": ["bash", "-c"],
-  "cmd": ["curl -fsSL --retry 5 -o /tmp/setup-h3.sh https://raw.githubusercontent.com/AKB428/runpod-h3/cab9e5a1e1a3174259e910eda1bd91c1fc09fcf0/setup-h3.sh && curl -fsSL --retry 5 -o /tmp/setup-h3-ollama.sh https://raw.githubusercontent.com/AKB428/runpod-h3/cab9e5a1e1a3174259e910eda1bd91c1fc09fcf0/setup-h3-ollama.sh && (bash /tmp/setup-h3-ollama.sh &); exec /start.sh"]
+  "cmd": ["curl -fsSL --retry 5 -o /tmp/setup-h3.sh https://raw.githubusercontent.com/AKB428/runpod-h3/382053e058627dbff03ea79fd065b9bad8e11371/setup-h3.sh && curl -fsSL --retry 5 -o /tmp/setup-h3-ollama.sh https://raw.githubusercontent.com/AKB428/runpod-h3/382053e058627dbff03ea79fd065b9bad8e11371/setup-h3-ollama.sh && (bash /tmp/setup-h3-ollama.sh &); exec /start.sh"]
 }
 ```
 
@@ -93,7 +93,7 @@ ComfyUI(8188)と Ollama(11434)を 1 つの pod に入れます。Vidubus の接�
 
 `setup-h3.sh` is a start-up helper for a RunPod pod template. The template uses RunPod's official ComfyUI image (`runpod/comfyui:1.4.0-comfyuiv0.35.0-cuda13.0`) as is, and its start command runs this script in the background before handing over to the image's own `/start.sh`. The script waits until ComfyUI has been copied into `/workspace`, then downloads the seven MiniMax H3 files (64.96 GB, pinned revision of `Comfy-Org/MiniMax-H3`) with aria2c into `ComfyUI/models/`. Files that already exist with the correct size are skipped. It does not modify ComfyUI, torch or custom nodes. Progress is shown in the pod's Logs and in `/workspace/h3-setup.log`. Terminating the pod after use is recommended: a stopped pod cannot be restarted when its host's GPU has been taken. If you want the models to survive a Stop, add a Volume disk on the Deploy page (Add volume → Volume disk → 100 GB); otherwise `/workspace` lives on the container disk. Port 8188 has no authentication, so stop or terminate the pod when you are done. Check the MiniMax H3 model license yourself.
 
-The all-in variant (`setup-h3-ollama.sh`, template `74lrexbk5l`) additionally installs Ollama 0.32.13 (pinned: later versions run several times slower inside containers on many-core hosts), pulls `gemma4:12b-it-qat`, serves it on `0.0.0.0:11434` (no authentication) and then runs `setup-h3.sh`. Wait for `[ollama-setup] … all ready` in the Logs (about 13 minutes on an RTX PRO 4500). Check the Gemma license as well.
+The all-in variant (`setup-h3-ollama.sh`, template `74lrexbk5l`) additionally installs Ollama 0.32.13 (pinned: later versions run several times slower inside containers on many-core hosts), pulls `gemma4:12b-it-qat` (progress lines `<model> 45% (3.2/7.2 GB)` every 10 s / 10 % in the Logs), serves it on `0.0.0.0:11434` (no authentication) and then runs `setup-h3.sh`. Wait for `[ollama-setup] … all ready` in the Logs (about 13 minutes on an RTX PRO 4500). Check the Gemma license as well.
 
 ## License
 
