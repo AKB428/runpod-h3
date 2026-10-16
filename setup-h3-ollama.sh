@@ -10,6 +10,7 @@
 #   (CPU thread pool spins on a host with many cores; measured on RunPod 2026-09-28).
 # - Files that already exist are skipped (2nd boot / Volume disk).
 # - Log: RunPod "Logs" tab and /workspace/ollama-setup.log (+ /workspace/h3-setup.log)
+#   The pull shows "[ollama-setup] HH:MM:SS <model> 45% (3.0/6.7 GB)" every 10 s / 10 %; raw lines = /workspace/ollama-pull.log
 set -u
 OLLAMA_VER=0.32.13
 OLLAMA_MODEL=gemma4:12b-it-qat
@@ -52,8 +53,35 @@ if [ -x "$OBIN" ]; then
   for i in $(seq 1 60); do curl -sf http://127.0.0.1:11434/api/version >/dev/null && break; sleep 1; done
   say "serve $(curl -s http://127.0.0.1:11434/api/version) on 0.0.0.0:11434"
 
+  # Pull through the API (one JSON line per update). The raw lines go to /workspace/ollama-pull.log;
+  # the Logs tab gets "<model> 45% (3.0/6.7 GB)" every 10 s or every 10 %.
   say "pull $OLLAMA_MODEL"
-  OLLAMA_HOST=127.0.0.1:11434 "$OBIN" pull "$OLLAMA_MODEL" >> /workspace/ollama-pull.log 2>&1 </dev/null \
+  gb() { local x=$(($1 / 100000000)); echo "$((x / 10)).$((x % 10))"; }
+  pull_progress() {
+    local line d pct now sum_t sum_c last_pct=-10 last_t=0 last_status=""
+    declare -A tot=() com=()
+    while IFS= read -r line; do
+      echo "$line" >> /workspace/ollama-pull.log
+      if [[ $line =~ \"error\":\"([^\"]*)\" ]]; then say "ERROR: pull: ${BASH_REMATCH[1]}"; return 1; fi
+      if [[ $line =~ \"digest\":\"([^\"]+)\" ]]; then
+        d=${BASH_REMATCH[1]}
+        [[ $line =~ \"total\":([0-9]+) ]] && tot[$d]=${BASH_REMATCH[1]}
+        [[ $line =~ \"completed\":([0-9]+) ]] && com[$d]=${BASH_REMATCH[1]}
+        sum_t=0; sum_c=0
+        for d in "${!tot[@]}"; do sum_t=$((sum_t + tot[$d])); sum_c=$((sum_c + ${com[$d]:-0})); done
+        [ "$sum_t" -gt 0 ] || continue
+        pct=$((sum_c * 100 / sum_t)); printf -v now "%(%s)T" -1
+        if [ $((pct - last_pct)) -ge 10 ] || [ $((now - last_t)) -ge 10 ] || { [ "$pct" -eq 100 ] && [ "$last_pct" -ne 100 ]; }; then
+          say "$OLLAMA_MODEL $pct% ($(gb $sum_c)/$(gb $sum_t) GB)"
+          last_pct=$pct; last_t=$now
+        fi
+      elif [[ $line =~ \"status\":\"([^\"]*)\" ]] && [ "${BASH_REMATCH[1]}" != "$last_status" ]; then
+        last_status=${BASH_REMATCH[1]}
+        say "$OLLAMA_MODEL $last_status"
+      fi
+    done
+  }
+  curl -sN --fail-with-body http://127.0.0.1:11434/api/pull -d "{\"model\":\"$OLLAMA_MODEL\"}" </dev/null | pull_progress \
     || say "ERROR: pull failed (see /workspace/ollama-pull.log)"
   if OLLAMA_HOST=127.0.0.1:11434 "$OBIN" list 2>/dev/null | grep -q "^$OLLAMA_MODEL "; then
     say "Ollama ready ($OLLAMA_MODEL · $(du -sh "$ODIR/models" | cut -f1))"
