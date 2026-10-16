@@ -4,7 +4,7 @@ RunPod の公式 ComfyUI イメージに、MiniMax H3(音声つき動画生成�
 RunPod のテンプレート「**Vidubus MiniMax H3 ComfyUI 0.35 CUDA13**」が、このリポジトリの `setup-h3.sh` を起動時に流します。
 Ollama(gemma4:12b-it-qat)も同じ pod に入れるオールイン版「**Vidubus MiniMax H3 Ollama ComfyUI 0.35 CUDA13**」もあります(`setup-h3-ollama.sh` · [下の節](#オールイン版ollama-込み))。
 
-- 解説記事: (準備中 · note の記事 URL をここに入れます)
+- 解説記事(note · 無料): https://note.com/akb428/n/n30b8ec72881a
 - テンプレート: https://console.runpod.io/deploy?template=uv8e4qky3x
 - テンプレート(オールイン版): https://console.runpod.io/deploy?template=74lrexbk5l
 - Vidubus(日本語で頼むと H3 の動画ができるローカルアプリ): https://vidubus.pages.dev/
